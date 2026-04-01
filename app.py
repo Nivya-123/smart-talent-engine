@@ -1,8 +1,9 @@
+import os
 from PyPDF2 import PdfReader
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# STEP 1: Extract text from PDF
+# Extract text from PDF
 def extract_text_from_pdf(file_path):
     text = ""
     reader = PdfReader(file_path)
@@ -13,48 +14,47 @@ def extract_text_from_pdf(file_path):
     
     return text
 
-# STEP 2: Preprocess text
+# Preprocess text
 def preprocess_text(text):
     return text.lower()
 
-# STEP 3: TF-IDF
-def apply_tfidf(texts):
-    vectorizer = TfidfVectorizer()
-    vectors = vectorizer.fit_transform(texts)
-    return vectors
-
-# STEP 4: Similarity (Resume vs JD)
+# Calculate similarity
 def calculate_similarity(resume_text, jd_text):
-    texts = [resume_text, jd_text]
-    vectors = apply_tfidf(texts)
-    
+    vectorizer = TfidfVectorizer()
+    vectors = vectorizer.fit_transform([resume_text, jd_text])
     similarity = cosine_similarity(vectors[0], vectors[1])
     return similarity[0][0]
 
 # MAIN
 if __name__ == "__main__":
     
-    resume_path = "resume1.pdf"
+    resumes_folder = "resumes"
 
-    # Example Job Description
     job_description = """
-    Looking for a Python developer with knowledge in machine learning,
-    data analysis, and web development.
+    Looking for a Python developer with skills in machine learning,
+    data analysis, and backend development.
     """
 
-    try:
-        # Extract Resume
-        resume_text = extract_text_from_pdf(resume_path)
-        resume_text = preprocess_text(resume_text)
+    jd_text = preprocess_text(job_description)
 
-        # Preprocess JD
-        jd_text = preprocess_text(job_description)
+    results = []
 
-        # Calculate similarity
-        score = calculate_similarity(resume_text, jd_text)
+    # Loop through all resumes
+    for file in os.listdir(resumes_folder):
+        if file.endswith(".pdf"):
+            path = os.path.join(resumes_folder, file)
 
-        print("✅ Resume Processed")
-        print("✅ Similarity Score:", round(score * 100, 2), "%")
+            resume_text = extract_text_from_pdf(path)
+            resume_text = preprocess_text(resume_text)
 
-    except Exception as e:
-        print("Error:", e)
+            score = calculate_similarity(resume_text, jd_text)
+
+            results.append((file, score))
+
+    # Sort by score (highest first)
+    results.sort(key=lambda x: x[1], reverse=True)
+
+    print("\n🎯 Candidate Ranking:\n")
+
+    for i, (name, score) in enumerate(results):
+        print(f"{i+1}. {name} → {round(score*100, 2)}% match")

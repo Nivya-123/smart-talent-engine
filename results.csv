@@ -1,0 +1,4 @@
+Name,Score,Skills,Matched Skills,Missing Skills
+resume1.pdf,19.89,"python, data analysis, sql","python, data analysis, sql","the, machine, of, scikit-learn, are"
+resume3.pdf,18.6,,,"the, machine, of, scikit-learn, are"
+resume2.pdf,13.68,"python, java, data analysis, django, html, css, javascript","python, data analysis, django","the, machine, of, scikit-learn, are"

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Talent Selection Engine</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🚀 Smart Talent Selection Engine</h1>
+    <p class="subtitle">AI-powered Resume Screening & Candidate Ranking</p>
+
+    <!-- FORM -->
+    <form method="POST" enctype="multipart/form-data" class="card">
+        
+        <label>📄 Job Description</label>
+        <textarea name="job_description" placeholder="Paste job description here..."></textarea>
+
+        <label>📂 Upload Resumes</label>
+        <input type="file" name="resumes" multiple>
+
+        <button type="submit">Analyze Candidates</button>
+    </form>
+
+    {% if results %}
+
+    <h2>📊 Candidate Insights</h2>
+
+    <!-- CHART -->
+    <div class="chart-box card">
+        <canvas id="chart"></canvas>
+    </div>
+
+    <script>
+        const labels = {{ results | map(attribute='name') | list | tojson }};
+        const scores = {{ results | map(attribute='score') | list | tojson }};
+
+        new Chart(document.getElementById("chart"), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Match Score (%)',
+                    data: scores,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    </script>
+
+    <!-- RESULTS -->
+    <div class="results-grid">
+
+        {% for r in results %}
+        <div class="result-card">
+            <h3>{{ r.name }}</h3>
+
+            <div class="score">{{ r.score }}%</div>
+
+            <p><b>Skills:</b> {{ r.skills }}</p>
+            <p><b>Matched:</b> {{ r.matched }}</p>
+            <p><b>Missing:</b> {{ r.missing }}</p>
+        </div>
+        {% endfor %}
+
+    </div>
+
+    <a href="/download" class="download-btn">⬇ Download Report</a>
+
+    {% endif %}
+
+</div>
+
+</body>
+</html>
